@@ -1,0 +1,22 @@
+{
+  "name": "@infrasync-example/google-workspace-shared-mailbox",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Set up a Google Workspace group as a public-facing shared mailbox",
+  "scripts": {
+    "plan": "infrasync plan --config infra.config.ts",
+    "apply": "infrasync apply --config infra.config.ts",
+    "drift": "infrasync drift --config infra.config.ts",
+    "_typecheck": "tsc -p tsconfig.json --noEmit",
+    "_lint": "eslint . --cache"
+  },
+  "dependencies": {
+    "@infrasync-org/core": "workspace:*",
+    "@infrasync-org/google-workspace": "workspace:*"
+  },
+  "devDependencies": {
+    "@infrasync-org/cli": "workspace:*",
+    "typescript": "6.0.3"
+  }
+}
