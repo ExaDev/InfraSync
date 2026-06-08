@@ -9,8 +9,21 @@ import {
   InboundSamlSsoProfileResource,
   directorySchemaSpecSchema,
   userCustomAttributeSpecSchema,
+  groupSpecSchema,
+  buildGroupRefs,
+  GroupResource,
+  groupSettingsSpecSchema,
+  buildGroupSettingsRefs,
+  GroupSettingsResource,
+  groupMemberSpecSchema,
+  buildGroupMemberRefs,
+  GroupMemberResource,
 } from "../index.js";
-import { CloudIdentityClient, type GoogleRequester } from "../client.js";
+import {
+  CloudIdentityClient,
+  GroupsClient,
+  type GoogleRequester,
+} from "../client.js";
 import { ResolvedScopes } from "@infrasync-org/core/provider";
 import type { ResourceHandle } from "@infrasync-org/core/handles";
 import { RefToken } from "@infrasync-org/core/refs";
@@ -115,6 +128,9 @@ describe("Google Workspace adapter", () => {
       "InboundSamlSsoProfile",
       "DirectorySchema",
       "UserCustomAttribute",
+      "Group",
+      "GroupSettings",
+      "GroupMember",
     ]);
   });
 
@@ -837,6 +853,362 @@ describe("Google Workspace adapter", () => {
     assert.deepEqual(registered, [
       { kind: "DirectorySchema", name: "entra-schema" },
       { kind: "UserCustomAttribute", name: "joe-immutable-id" },
+    ]);
+  });
+});
+
+// ─── Groups: the shared-mailbox surface ──────────────────────────────────────
+
+describe("Google Workspace groups", () => {
+  interface Captured {
+    readonly url: string | undefined;
+    readonly method: string | undefined;
+    readonly params: unknown;
+    readonly data: unknown;
+  }
+
+  /**
+   * Build a `GroupsClient` over a stub requester that records every request
+   * and replies with `response` to each. Each test here issues a single
+   * request, so one canned response suffices.
+   */
+  function stubGroups(response: unknown): {
+    readonly client: GroupsClient;
+    readonly captured: Captured[];
+  } {
+    const captured: Captured[] = [];
+    const requester = {
+      async request(opts: {
+        url?: string;
+        method?: string;
+        params?: unknown;
+        data?: unknown;
+      }): Promise<{ data: unknown }> {
+        await Promise.resolve();
+        captured.push({
+          url: opts.url,
+          method: opts.method,
+          params: opts.params,
+          data: opts.data,
+        });
+        return { data: response };
+      },
+    } as unknown as GoogleRequester;
+    return { client: new GroupsClient(requester), captured };
+  }
+
+  // ─── Group ────────────────────────────────────────────────────────────────
+
+  it("parses a valid Group spec and defaults description to empty", () => {
+    const result = groupSpecSchema.safeParse({
+      kind: "Group",
+      email: "support@example.com",
+      displayName: "Support",
+    });
+    assert.ok(result.success);
+    assert.equal(result.data.description, "");
+  });
+
+  it("rejects a Group spec with a non-email address", () => {
+    const result = groupSpecSchema.safeParse({
+      kind: "Group",
+      email: "not-an-email",
+      displayName: "Support",
+    });
+    assert.ok(!result.success);
+  });
+
+  it("buildGroupRefs exposes id and email ref tokens", () => {
+    const refs = buildGroupRefs("support");
+    assert.ok(refs.id instanceof RefToken);
+    assert.ok(refs.email instanceof RefToken);
+  });
+
+  it("Group.read maps the API `name` field onto displayName", async () => {
+    const { client } = stubGroups({
+      id: "01234567890",
+      email: "support@example.com",
+      name: "Support",
+      description: "Customer support inbox",
+    });
+    const resource = new GroupResource(client);
+    const state = await resource.read({
+      kind: "Group",
+      email: "support@example.com",
+      displayName: "Support",
+    });
+    assert.deepEqual(state, {
+      id: "01234567890",
+      email: "support@example.com",
+      displayName: "Support",
+      description: "Customer support inbox",
+    });
+  });
+
+  it("Group.create sends name + description and returns mapped state", async () => {
+    const { client, captured } = stubGroups({
+      id: "01234567890",
+      email: "support@example.com",
+      name: "Support",
+      description: "",
+    });
+    const resource = new GroupResource(client);
+    await resource.create({
+      kind: "Group",
+      email: "support@example.com",
+      displayName: "Support",
+      description: "",
+    });
+    const first = captured[0];
+    assert.ok(first !== undefined);
+    assert.equal(first.method, "POST");
+    assert.deepEqual(first.data, {
+      email: "support@example.com",
+      name: "Support",
+      description: "",
+    });
+  });
+
+  it("Group.read returns undefined on a 404", async () => {
+    const requester = {
+      async request(): Promise<{ data: unknown }> {
+        await Promise.resolve();
+        const err = new Error("not found") as Error & { code: number };
+        err.code = 404;
+        throw err;
+      },
+    } as unknown as GoogleRequester;
+    const resource = new GroupResource(new GroupsClient(requester));
+    const state = await resource.read({
+      kind: "Group",
+      email: "absent@example.com",
+      displayName: "Absent",
+    });
+    assert.equal(state, undefined);
+  });
+
+  // ─── GroupSettings ──────────────────────────────────────────────────────
+
+  it("parses a valid public-facing GroupSettings spec", () => {
+    const result = groupSettingsSpecSchema.safeParse({
+      kind: "GroupSettings",
+      groupEmail: "support@example.com",
+      whoCanPostMessage: "ANYONE_CAN_POST",
+      allowExternalMembers: false,
+      whoCanJoin: "INVITED_CAN_JOIN",
+      whoCanViewGroup: "ALL_MEMBERS_CAN_VIEW",
+      whoCanViewMembership: "ALL_MEMBERS_CAN_VIEW",
+      messageModerationLevel: "MODERATE_NONE",
+      isArchived: true,
+      includeInGlobalAddressList: true,
+    });
+    assert.ok(result.success);
+  });
+
+  it("rejects a GroupSettings spec with an unknown posting value", () => {
+    const result = groupSettingsSpecSchema.safeParse({
+      kind: "GroupSettings",
+      groupEmail: "support@example.com",
+      whoCanPostMessage: "EVERYONE",
+      allowExternalMembers: false,
+      whoCanJoin: "INVITED_CAN_JOIN",
+      whoCanViewGroup: "ALL_MEMBERS_CAN_VIEW",
+      whoCanViewMembership: "ALL_MEMBERS_CAN_VIEW",
+      messageModerationLevel: "MODERATE_NONE",
+      isArchived: true,
+      includeInGlobalAddressList: true,
+    });
+    assert.ok(!result.success);
+  });
+
+  it("GroupSettings.read coerces the API's string booleans to booleans", async () => {
+    const { client, captured } = stubGroups({
+      email: "support@example.com",
+      whoCanPostMessage: "ANYONE_CAN_POST",
+      allowExternalMembers: "false",
+      whoCanJoin: "INVITED_CAN_JOIN",
+      whoCanViewGroup: "ALL_MEMBERS_CAN_VIEW",
+      whoCanViewMembership: "ALL_MEMBERS_CAN_VIEW",
+      messageModerationLevel: "MODERATE_NONE",
+      isArchived: "true",
+      includeInGlobalAddressList: "true",
+    });
+    const resource = new GroupSettingsResource(client);
+    const state = await resource.read({
+      kind: "GroupSettings",
+      groupEmail: "support@example.com",
+      whoCanPostMessage: "ANYONE_CAN_POST",
+      allowExternalMembers: false,
+      whoCanJoin: "INVITED_CAN_JOIN",
+      whoCanViewGroup: "ALL_MEMBERS_CAN_VIEW",
+      whoCanViewMembership: "ALL_MEMBERS_CAN_VIEW",
+      messageModerationLevel: "MODERATE_NONE",
+      isArchived: true,
+      includeInGlobalAddressList: true,
+    });
+    assert.ok(state !== undefined && typeof state === "object");
+    assert.equal(
+      (state as { allowExternalMembers: unknown }).allowExternalMembers,
+      false,
+    );
+    assert.equal((state as { isArchived: unknown }).isArchived, true);
+    // The Groups Settings API must be asked for JSON explicitly.
+    const first = captured[0];
+    assert.ok(first !== undefined);
+    assert.deepEqual(first.params, { alt: "json" });
+  });
+
+  it("GroupSettings.update encodes booleans as strings in the PUT body", async () => {
+    const settingsResponse = {
+      email: "support@example.com",
+      whoCanPostMessage: "ANYONE_CAN_POST",
+      allowExternalMembers: "false",
+      whoCanJoin: "INVITED_CAN_JOIN",
+      whoCanViewGroup: "ALL_MEMBERS_CAN_VIEW",
+      whoCanViewMembership: "ALL_MEMBERS_CAN_VIEW",
+      messageModerationLevel: "MODERATE_NONE",
+      isArchived: "true",
+      includeInGlobalAddressList: "true",
+    };
+    const { client, captured } = stubGroups(settingsResponse);
+    const resource = new GroupSettingsResource(client);
+    await resource.update("support@example.com", {
+      kind: "GroupSettings",
+      groupEmail: "support@example.com",
+      whoCanPostMessage: "ANYONE_CAN_POST",
+      allowExternalMembers: false,
+      whoCanJoin: "INVITED_CAN_JOIN",
+      whoCanViewGroup: "ALL_MEMBERS_CAN_VIEW",
+      whoCanViewMembership: "ALL_MEMBERS_CAN_VIEW",
+      messageModerationLevel: "MODERATE_NONE",
+      isArchived: true,
+      includeInGlobalAddressList: true,
+    });
+    const first = captured[0];
+    assert.ok(first !== undefined);
+    assert.equal(first.method, "PUT");
+    assert.ok(first.data !== null && typeof first.data === "object");
+    const body = first.data as Record<string, unknown>;
+    assert.equal(body.allowExternalMembers, "false");
+    assert.equal(body.isArchived, "true");
+    assert.equal(body.whoCanPostMessage, "ANYONE_CAN_POST");
+  });
+
+  it("buildGroupSettingsRefs exposes a groupEmail ref token", () => {
+    const refs = buildGroupSettingsRefs("support-settings");
+    assert.ok(refs.groupEmail instanceof RefToken);
+  });
+
+  // ─── GroupMember ──────────────────────────────────────────────────────────
+
+  it("GroupMember spec defaults role to MEMBER and delivery to ALL_MAIL", () => {
+    const result = groupMemberSpecSchema.safeParse({
+      kind: "GroupMember",
+      groupEmail: "support@example.com",
+      memberEmail: "joe@example.com",
+    });
+    assert.ok(result.success);
+    assert.equal(result.data.role, "MEMBER");
+    assert.equal(result.data.deliverySettings, "ALL_MAIL");
+  });
+
+  it("GroupMember.create maps deliverySettings to the API's delivery_settings", async () => {
+    const { client, captured } = stubGroups({
+      id: "member-id-1",
+      email: "joe@example.com",
+      role: "MANAGER",
+      delivery_settings: "ALL_MAIL",
+    });
+    const resource = new GroupMemberResource(client);
+    const state = await resource.create({
+      kind: "GroupMember",
+      groupEmail: "support@example.com",
+      memberEmail: "joe@example.com",
+      role: "MANAGER",
+      deliverySettings: "ALL_MAIL",
+    });
+    const first = captured[0];
+    assert.ok(first !== undefined);
+    assert.equal(first.method, "POST");
+    assert.ok(first.data !== null && typeof first.data === "object");
+    assert.equal(
+      (first.data as Record<string, unknown>).delivery_settings,
+      "ALL_MAIL",
+    );
+    assert.deepEqual(state, {
+      id: "member-id-1",
+      groupEmail: "support@example.com",
+      memberEmail: "joe@example.com",
+      role: "MANAGER",
+      deliverySettings: "ALL_MAIL",
+    });
+  });
+
+  it("GroupMember.delete addresses the member by group and member email", async () => {
+    const { client, captured } = stubGroups({});
+    const resource = new GroupMemberResource(client);
+    await resource.delete({
+      id: "member-id-1",
+      groupEmail: "support@example.com",
+      memberEmail: "joe@example.com",
+      role: "MANAGER",
+      deliverySettings: "ALL_MAIL",
+    });
+    const first = captured[0];
+    assert.ok(first !== undefined);
+    assert.equal(first.method, "DELETE");
+    assert.ok(first.url !== undefined);
+    assert.match(
+      first.url,
+      /support%40example\.com\/members\/joe%40example\.com$/,
+    );
+  });
+
+  it("buildGroupMemberRefs exposes an id ref token", () => {
+    const refs = buildGroupMemberRefs("support-owner");
+    assert.ok(refs.id instanceof RefToken);
+  });
+
+  it("typed handle registers group, settings and member resources", () => {
+    const registered: { kind: string; name: string }[] = [];
+    const handle = createGoogleWorkspaceHandle(
+      "gw",
+      "google-workspace",
+      (h) => {
+        registered.push({ kind: h.kind, name: h.name });
+      },
+    );
+
+    handle.group("support", {
+      kind: "Group",
+      email: "support@example.com",
+      displayName: "Support",
+      description: "Customer support inbox",
+    });
+    handle.groupSettings("support-settings", {
+      kind: "GroupSettings",
+      groupEmail: "support@example.com",
+      whoCanPostMessage: "ANYONE_CAN_POST",
+      allowExternalMembers: false,
+      whoCanJoin: "INVITED_CAN_JOIN",
+      whoCanViewGroup: "ALL_MEMBERS_CAN_VIEW",
+      whoCanViewMembership: "ALL_MEMBERS_CAN_VIEW",
+      messageModerationLevel: "MODERATE_NONE",
+      isArchived: true,
+      includeInGlobalAddressList: true,
+    });
+    handle.groupMember("support-owner", {
+      kind: "GroupMember",
+      groupEmail: "support@example.com",
+      memberEmail: "joe@example.com",
+      role: "OWNER",
+      deliverySettings: "ALL_MAIL",
+    });
+
+    assert.deepEqual(registered, [
+      { kind: "Group", name: "support" },
+      { kind: "GroupSettings", name: "support-settings" },
+      { kind: "GroupMember", name: "support-owner" },
     ]);
   });
 });

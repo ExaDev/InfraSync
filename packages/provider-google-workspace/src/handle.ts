@@ -26,6 +26,12 @@ import type {
   UserCustomAttributeSpec,
 } from "./user-custom-attribute.js";
 import { buildUserCustomAttributeRefs } from "./user-custom-attribute.js";
+import type { GroupRefs, GroupSpec } from "./group.js";
+import { buildGroupRefs } from "./group.js";
+import type { GroupSettingsRefs, GroupSettingsSpec } from "./group-settings.js";
+import { buildGroupSettingsRefs } from "./group-settings.js";
+import type { GroupMemberRefs, GroupMemberSpec } from "./group-member.js";
+import { buildGroupMemberRefs } from "./group-member.js";
 
 // ─── Registration function ───────────────────────────────────────────────────
 
@@ -76,6 +82,36 @@ export interface GoogleWorkspaceProviderHandle {
     spec: UserCustomAttributeSpec,
     options?: ResourceOptions,
   ): ResourceHandle<UserCustomAttributeSpec, UserCustomAttributeRefs>;
+
+  /**
+   * Create a Google group (the object behind a shared mailbox address).
+   * Returns a handle with typed ref surface (id, email).
+   */
+  group(
+    id: string,
+    spec: GroupSpec,
+    options?: ResourceOptions,
+  ): ResourceHandle<GroupSpec, GroupRefs>;
+
+  /**
+   * Set a group's posting/visibility policy — the public-facing posture.
+   * Returns a handle with typed ref surface (groupEmail).
+   */
+  groupSettings(
+    id: string,
+    spec: GroupSettingsSpec,
+    options?: ResourceOptions,
+  ): ResourceHandle<GroupSettingsSpec, GroupSettingsRefs>;
+
+  /**
+   * Add a member to a group with a role and delivery preference.
+   * Returns a handle with typed ref surface (id).
+   */
+  groupMember(
+    id: string,
+    spec: GroupMemberSpec,
+    options?: ResourceOptions,
+  ): ResourceHandle<GroupMemberSpec, GroupMemberRefs>;
 }
 
 // ─── Implementation ──────────────────────────────────────────────────────────
@@ -126,6 +162,42 @@ class GoogleWorkspaceProviderHandleImpl implements GoogleWorkspaceProviderHandle
       spec,
       options,
       buildUserCustomAttributeRefs,
+    );
+  }
+
+  group(
+    id: string,
+    spec: GroupSpec,
+    options?: ResourceOptions,
+  ): ResourceHandle<GroupSpec, GroupRefs> {
+    return this.typedResource("Group", id, spec, options, buildGroupRefs);
+  }
+
+  groupSettings(
+    id: string,
+    spec: GroupSettingsSpec,
+    options?: ResourceOptions,
+  ): ResourceHandle<GroupSettingsSpec, GroupSettingsRefs> {
+    return this.typedResource(
+      "GroupSettings",
+      id,
+      spec,
+      options,
+      buildGroupSettingsRefs,
+    );
+  }
+
+  groupMember(
+    id: string,
+    spec: GroupMemberSpec,
+    options?: ResourceOptions,
+  ): ResourceHandle<GroupMemberSpec, GroupMemberRefs> {
+    return this.typedResource(
+      "GroupMember",
+      id,
+      spec,
+      options,
+      buildGroupMemberRefs,
     );
   }
 

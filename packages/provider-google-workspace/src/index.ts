@@ -23,10 +23,15 @@ import {
   buildRequester,
   DirectoryClient,
   buildDirectoryWriteRequester,
+  GroupsClient,
+  buildGroupsWriteRequester,
 } from "./client.js";
 import { InboundSamlSsoProfileResource } from "./inbound-saml-sso-profile.js";
 import { DirectorySchemaResource } from "./directory-schema.js";
 import { UserCustomAttributeResource } from "./user-custom-attribute.js";
+import { GroupResource } from "./group.js";
+import { GroupSettingsResource } from "./group-settings.js";
+import { GroupMemberResource } from "./group-member.js";
 
 // ─── Config schema ───────────────────────────────────────────────────────────
 
@@ -80,6 +85,7 @@ export class GoogleWorkspaceProvider implements ProviderPort<
 
   private client: CloudIdentityClient | undefined;
   private directoryClient: DirectoryClient | undefined;
+  private groupsClient: GroupsClient | undefined;
 
   constructor() {
     this.registry.register(
@@ -93,6 +99,15 @@ export class GoogleWorkspaceProvider implements ProviderPort<
     this.registry.register(
       "UserCustomAttribute",
       () => new UserCustomAttributeResource(this.directoryClient),
+    );
+    this.registry.register("Group", () => new GroupResource(this.groupsClient));
+    this.registry.register(
+      "GroupSettings",
+      () => new GroupSettingsResource(this.groupsClient),
+    );
+    this.registry.register(
+      "GroupMember",
+      () => new GroupMemberResource(this.groupsClient),
     );
   }
 
@@ -114,6 +129,16 @@ export class GoogleWorkspaceProvider implements ProviderPort<
       );
     }
     return this.directoryClient;
+  }
+
+  /** Returns the connected Groups client or throws if not connected. */
+  connectedGroupsClient(): GroupsClient {
+    if (this.groupsClient === undefined) {
+      throw new Error(
+        "Google Workspace provider not connected — call connect() first",
+      );
+    }
+    return this.groupsClient;
   }
 
   async connect(config: unknown): Promise<void> {
@@ -157,12 +182,30 @@ export class GoogleWorkspaceProvider implements ProviderPort<
       result.data.customerId,
     );
 
+    // Build a Groups client spanning the Directory group/member APIs and the
+    // Groups Settings API — the surfaces behind a shared mailbox.
+    const groupsRequester =
+      result.data.kind === "oauth-user"
+        ? buildGroupsWriteRequester({
+            kind: "oauth-user",
+            clientId: result.data.clientId,
+            clientSecret: result.data.clientSecret,
+            refreshToken: result.data.refreshToken,
+          })
+        : buildGroupsWriteRequester({
+            kind: "service-account",
+            serviceAccountKey: result.data.serviceAccountKey,
+            subjectEmail: result.data.subjectEmail,
+          });
+    this.groupsClient = new GroupsClient(groupsRequester);
+
     await Promise.resolve();
   }
 
   async disconnect(): Promise<void> {
     this.client = undefined;
     this.directoryClient = undefined;
+    this.groupsClient = undefined;
     await Promise.resolve();
   }
 
@@ -203,6 +246,30 @@ export {
 } from "./user-custom-attribute.js";
 
 export {
+  groupSpecSchema,
+  type GroupSpec,
+  buildGroupRefs,
+  type GroupRefs,
+  GroupResource,
+} from "./group.js";
+
+export {
+  groupSettingsSpecSchema,
+  type GroupSettingsSpec,
+  buildGroupSettingsRefs,
+  type GroupSettingsRefs,
+  GroupSettingsResource,
+} from "./group-settings.js";
+
+export {
+  groupMemberSpecSchema,
+  type GroupMemberSpec,
+  buildGroupMemberRefs,
+  type GroupMemberRefs,
+  GroupMemberResource,
+} from "./group-member.js";
+
+export {
   createGoogleWorkspaceHandle,
   type GoogleWorkspaceProviderHandle,
 } from "./handle.js";
@@ -211,6 +278,8 @@ export {
   DirectoryClient,
   buildDirectoryRequester,
   buildDirectoryWriteRequester,
+  GroupsClient,
+  buildGroupsWriteRequester,
   type DirectoryUser,
   directoryUserSchema,
 } from "./client.js";

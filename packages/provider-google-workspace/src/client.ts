@@ -56,8 +56,26 @@ const DIRECTORY_USER_SCOPE =
 // Schema management requires the admin.directory.userschema scope — separate from
 // admin.directory.user which covers user CRUD only.
 
+/** Required OAuth scope for Admin Directory API group and member read/write. */
+const DIRECTORY_GROUP_SCOPE =
+  "https://www.googleapis.com/auth/admin.directory.group";
+
+/** Required OAuth scope for the Groups Settings API. */
+const GROUPS_SETTINGS_SCOPE =
+  "https://www.googleapis.com/auth/apps.groups.settings";
+
 /** Base URL for the Admin Directory API. */
 const DIRECTORY_BASE = "https://admin.googleapis.com/admin/directory/v1";
+
+/**
+ * Base URL for the Groups Settings API.
+ *
+ * This is a legacy API that defaults to Atom XML responses — every request
+ * must carry `alt=json` to get JSON back.
+ *
+ * @see https://developers.google.com/workspace/admin/groups-settings/manage
+ */
+const GROUPS_SETTINGS_BASE = "https://www.googleapis.com/groups/v1/groups";
 
 // ─── Service-account key parsing ─────────────────────────────────────────────
 
@@ -192,6 +210,37 @@ export function buildDirectoryWriteRequester(
       DIRECTORY_USER_SCOPE,
       "https://www.googleapis.com/auth/admin.directory.userschema",
     ],
+    clientOptions: { subject: options.subjectEmail },
+  });
+}
+
+/**
+ * Build a requester for managing Google Groups: the Admin Directory API
+ * (group + member CRUD) and the Groups Settings API (the posting/visibility
+ * policy that makes a group a public-facing mailbox).
+ *
+ * OAuth2 user clients carry their granted scopes in the refresh token, so the
+ * scope list only takes effect for the service-account (domain-wide
+ * delegation) path.
+ */
+export function buildGroupsWriteRequester(
+  options: AuthOptions,
+): GoogleRequester {
+  if (options.kind === "oauth-user") {
+    const oauthClient = new OAuth2Client({
+      clientId: options.clientId,
+      clientSecret: options.clientSecret,
+    });
+    oauthClient.setCredentials({ refresh_token: options.refreshToken });
+    return oauthClient;
+  }
+  const credentials = parseServiceAccountKey(options.serviceAccountKey);
+  return new GoogleAuth({
+    credentials: {
+      client_email: credentials.client_email,
+      private_key: credentials.private_key,
+    },
+    scopes: [DIRECTORY_GROUP_SCOPE, GROUPS_SETTINGS_SCOPE],
     clientOptions: { subject: options.subjectEmail },
   });
 }
@@ -560,6 +609,149 @@ export class DirectoryClient {
     const response = await this.auth.request<unknown>({
       url: `${DIRECTORY_BASE}/users/${userKey}`,
       method: "PATCH",
+      data: body,
+    });
+    return response.data;
+  }
+}
+
+// ─── Groups client ───────────────────────────────────────────────────────────
+
+/**
+ * Thin REST client for Google Groups, spanning two APIs:
+ *
+ * - The Admin Directory API (`groups` and `groups/{key}/members`) for the
+ *   group object and its membership.
+ * - The Groups Settings API (`groups/v1/groups/{key}`) for the posting,
+ *   membership and visibility policy that turns a group into a public-facing
+ *   shared mailbox.
+ *
+ * A group is keyed by either its primary email or its immutable id; both APIs
+ * accept either as the group key. Every method returns the raw API response —
+ * callers validate with Zod at their boundaries.
+ */
+export class GroupsClient {
+  constructor(private readonly auth: GoogleRequester) {}
+
+  // ─── Group CRUD (Directory API) ─────────────────────────────────────────
+
+  /** @see https://developers.google.com/workspace/admin/directory/v1/reference/groups/get */
+  async getGroup(groupKey: string): Promise<unknown> {
+    const response = await this.auth.request<unknown>({
+      url: `${DIRECTORY_BASE}/groups/${encodeURIComponent(groupKey)}`,
+      method: "GET",
+    });
+    return response.data;
+  }
+
+  /** @see https://developers.google.com/workspace/admin/directory/v1/reference/groups/insert */
+  async createGroup(body: Record<string, unknown>): Promise<unknown> {
+    const response = await this.auth.request<unknown>({
+      url: `${DIRECTORY_BASE}/groups`,
+      method: "POST",
+      data: body,
+    });
+    return response.data;
+  }
+
+  /** @see https://developers.google.com/workspace/admin/directory/v1/reference/groups/patch */
+  async patchGroup(
+    groupKey: string,
+    body: Record<string, unknown>,
+  ): Promise<unknown> {
+    const response = await this.auth.request<unknown>({
+      url: `${DIRECTORY_BASE}/groups/${encodeURIComponent(groupKey)}`,
+      method: "PATCH",
+      data: body,
+    });
+    return response.data;
+  }
+
+  /** @see https://developers.google.com/workspace/admin/directory/v1/reference/groups/delete */
+  async deleteGroup(groupKey: string): Promise<void> {
+    await this.auth.request<unknown>({
+      url: `${DIRECTORY_BASE}/groups/${encodeURIComponent(groupKey)}`,
+      method: "DELETE",
+    });
+  }
+
+  // ─── Member CRUD (Directory API) ────────────────────────────────────────
+
+  /** @see https://developers.google.com/workspace/admin/directory/v1/reference/members/get */
+  async getMember(groupKey: string, memberKey: string): Promise<unknown> {
+    const response = await this.auth.request<unknown>({
+      url: `${DIRECTORY_BASE}/groups/${encodeURIComponent(groupKey)}/members/${encodeURIComponent(memberKey)}`,
+      method: "GET",
+    });
+    return response.data;
+  }
+
+  /** @see https://developers.google.com/workspace/admin/directory/v1/reference/members/insert */
+  async insertMember(
+    groupKey: string,
+    body: Record<string, unknown>,
+  ): Promise<unknown> {
+    const response = await this.auth.request<unknown>({
+      url: `${DIRECTORY_BASE}/groups/${encodeURIComponent(groupKey)}/members`,
+      method: "POST",
+      data: body,
+    });
+    return response.data;
+  }
+
+  /** @see https://developers.google.com/workspace/admin/directory/v1/reference/members/patch */
+  async patchMember(
+    groupKey: string,
+    memberKey: string,
+    body: Record<string, unknown>,
+  ): Promise<unknown> {
+    const response = await this.auth.request<unknown>({
+      url: `${DIRECTORY_BASE}/groups/${encodeURIComponent(groupKey)}/members/${encodeURIComponent(memberKey)}`,
+      method: "PATCH",
+      data: body,
+    });
+    return response.data;
+  }
+
+  /** @see https://developers.google.com/workspace/admin/directory/v1/reference/members/delete */
+  async deleteMember(groupKey: string, memberKey: string): Promise<void> {
+    await this.auth.request<unknown>({
+      url: `${DIRECTORY_BASE}/groups/${encodeURIComponent(groupKey)}/members/${encodeURIComponent(memberKey)}`,
+      method: "DELETE",
+    });
+  }
+
+  // ─── Settings (Groups Settings API) ─────────────────────────────────────
+
+  /**
+   * Fetch a group's settings. The Groups Settings API defaults to Atom XML,
+   * so `alt=json` is mandatory.
+   *
+   * @see https://developers.google.com/workspace/admin/groups-settings/v1/reference/groups/get
+   */
+  async getSettings(groupKey: string): Promise<unknown> {
+    const response = await this.auth.request<unknown>({
+      url: `${GROUPS_SETTINGS_BASE}/${encodeURIComponent(groupKey)}`,
+      method: "GET",
+      params: { alt: "json" },
+    });
+    return response.data;
+  }
+
+  /**
+   * Replace a group's settings (PUT). The Groups Settings API merges the body
+   * with existing settings, so unspecified fields keep their current value.
+   *
+   * @see https://developers.google.com/workspace/admin/groups-settings/v1/reference/groups/update
+   */
+  async updateSettings(
+    groupKey: string,
+    body: Record<string, unknown>,
+  ): Promise<unknown> {
+    const response = await this.auth.request<unknown>({
+      url: `${GROUPS_SETTINGS_BASE}/${encodeURIComponent(groupKey)}`,
+      method: "PUT",
+      params: { alt: "json" },
       data: body,
     });
     return response.data;
