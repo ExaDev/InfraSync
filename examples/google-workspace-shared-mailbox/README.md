@@ -14,6 +14,15 @@ The mailbox is three resources that compose together:
 `GroupSettings` and each `GroupMember` declare `dependsOn: [support]`, so the
 engine creates the group before it configures or populates it.
 
+## Packages
+
+Everything comes from the single `infrasync` package: `defineInfra` from
+`infrasync`, and the Google Workspace adapter from the `infrasync/google-workspace`
+subpath. Each provider's heavy SDK is an optional peer dependency, pulled in
+only when you use that provider — so this example also installs
+`google-auth-library` (the Google Workspace provider's SDK). See
+[`package.json`](./package.json).
+
 ## Anyone-can-post vs external members
 
 These are independent settings and people routinely conflate them:

@@ -83,16 +83,13 @@ importers:
 
   examples/google-workspace-shared-mailbox:
     dependencies:
-      '@infrasync/core':
-        specifier: workspace:*
-        version: link:../../packages/core
-      '@infrasync/google-workspace':
-        specifier: workspace:*
-        version: link:../../packages/provider-google-workspace
-    devDependencies:
-      '@infrasync/cli':
+      google-auth-library:
+        specifier: 10.6.2
+        version: 10.6.2
+      infrasync:
         specifier: workspace:*
         version: link:../../packages/cli
+    devDependencies:
       typescript:
         specifier: 6.0.3
         version: 6.0.3
@@ -149,28 +146,76 @@ importers:
 
   packages/cli:
     dependencies:
-      '@infrasync/adapter-terraform-config-json':
-        specifier: workspace:*
-        version: link:../adapter-terraform-config-json
-      '@infrasync/adapter-terraform-show-json':
-        specifier: workspace:*
-        version: link:../adapter-terraform-show-json
-      '@infrasync/core-ir':
-        specifier: workspace:*
-        version: link:../core-ir
-      '@infrasync/migration-planner':
-        specifier: workspace:*
-        version: link:../migration-planner
       jiti:
         specifier: 2.6.1
         version: 2.6.1
       yaml:
         specifier: 2.9.0
         version: 2.9.0
+      zod:
+        specifier: 4.3.6
+        version: 4.3.6
     devDependencies:
+      '@azure/identity':
+        specifier: 4.13.1
+        version: 4.13.1
+      '@azure/identity-cache-persistence':
+        specifier: 1.3.0
+        version: 1.3.0
+      '@infrasync/adapter-terraform-config-json':
+        specifier: workspace:*
+        version: link:../adapter-terraform-config-json
+      '@infrasync/adapter-terraform-show-json':
+        specifier: workspace:*
+        version: link:../adapter-terraform-show-json
+      '@infrasync/cloudflare':
+        specifier: workspace:*
+        version: link:../provider-cloudflare
       '@infrasync/core':
         specifier: workspace:*
         version: link:../core
+      '@infrasync/core-ir':
+        specifier: workspace:*
+        version: link:../core-ir
+      '@infrasync/github':
+        specifier: workspace:*
+        version: link:../provider-github
+      '@infrasync/google-workspace':
+        specifier: workspace:*
+        version: link:../provider-google-workspace
+      '@infrasync/microsoft-entra-id':
+        specifier: workspace:*
+        version: link:../provider-microsoft-entra-id
+      '@infrasync/migration-planner':
+        specifier: workspace:*
+        version: link:../migration-planner
+      '@infrasync/namecheap':
+        specifier: workspace:*
+        version: link:../provider-namecheap
+      '@infrasync/namecom':
+        specifier: workspace:*
+        version: link:../provider-namecom
+      '@infrasync/tailscale':
+        specifier: workspace:*
+        version: link:../provider-tailscale
+      '@infrasync/vercel':
+        specifier: workspace:*
+        version: link:../provider-vercel
+      '@microsoft/microsoft-graph-client':
+        specifier: 3.0.7
+        version: 3.0.7(@azure/identity@4.13.1)
+      '@microsoft/microsoft-graph-types':
+        specifier: 2.43.1
+        version: 2.43.1
+      '@vercel/sdk':
+        specifier: 1.21.5
+        version: 1.21.5
+      cloudflare:
+        specifier: 5.2.0
+        version: 5.2.0
+      google-auth-library:
+        specifier: 10.6.2
+        version: 10.6.2
       tsdown:
         specifier: 0.21.7
         version: 0.21.7(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2)(synckit@0.11.12)(typescript@6.0.3)
@@ -180,9 +225,6 @@ importers:
       typescript:
         specifier: 6.0.3
         version: 6.0.3
-      zod:
-        specifier: 4.3.6
-        version: 4.3.6
 
   packages/core:
     dependencies:

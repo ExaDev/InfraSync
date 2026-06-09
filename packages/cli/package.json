@@ -1,14 +1,46 @@
 {
-  "name": "@infrasync/cli",
+  "name": "infrasync",
   "version": "0.1.0",
   "type": "module",
   "bin": {
     "infrasync": "./bin/infrasync.mjs"
   },
   "exports": {
-    "./*": {
-      "types": "./dist/*.d.mts",
-      "import": "./dist/*.mjs"
+    ".": {
+      "types": "./dist/sdk.d.mts",
+      "import": "./dist/sdk.mjs"
+    },
+    "./cloudflare": {
+      "types": "./dist/providers/cloudflare.d.mts",
+      "import": "./dist/providers/cloudflare.mjs"
+    },
+    "./github": {
+      "types": "./dist/providers/github.d.mts",
+      "import": "./dist/providers/github.mjs"
+    },
+    "./google-workspace": {
+      "types": "./dist/providers/google-workspace.d.mts",
+      "import": "./dist/providers/google-workspace.mjs"
+    },
+    "./microsoft-entra-id": {
+      "types": "./dist/providers/microsoft-entra-id.d.mts",
+      "import": "./dist/providers/microsoft-entra-id.mjs"
+    },
+    "./namecheap": {
+      "types": "./dist/providers/namecheap.d.mts",
+      "import": "./dist/providers/namecheap.mjs"
+    },
+    "./namecom": {
+      "types": "./dist/providers/namecom.d.mts",
+      "import": "./dist/providers/namecom.mjs"
+    },
+    "./tailscale": {
+      "types": "./dist/providers/tailscale.d.mts",
+      "import": "./dist/providers/tailscale.mjs"
+    },
+    "./vercel": {
+      "types": "./dist/providers/vercel.d.mts",
+      "import": "./dist/providers/vercel.mjs"
     }
   },
   "files": [
@@ -22,21 +54,49 @@
     "_test": "node --import tsx --test 'src/__tests__/*.int.test.ts' 'src/__tests__/*.unit.test.ts'"
   },
   "dependencies": {
-    "@infrasync/adapter-terraform-config-json": "workspace:*",
-    "@infrasync/adapter-terraform-show-json": "workspace:*",
-    "@infrasync/core-ir": "workspace:*",
-    "@infrasync/migration-planner": "workspace:*",
     "jiti": "2.6.1",
-    "yaml": "2.9.0"
+    "yaml": "2.9.0",
+    "zod": "4.3.6"
   },
   "peerDependencies": {
-    "@infrasync/core": "workspace:*"
+    "@azure/identity": "4.13.1",
+    "@azure/identity-cache-persistence": "1.3.0",
+    "@microsoft/microsoft-graph-client": "3.0.7",
+    "@vercel/sdk": "1.21.5",
+    "cloudflare": "5.2.0",
+    "google-auth-library": "10.6.2"
+  },
+  "peerDependenciesMeta": {
+    "@azure/identity": { "optional": true },
+    "@azure/identity-cache-persistence": { "optional": true },
+    "@microsoft/microsoft-graph-client": { "optional": true },
+    "@vercel/sdk": { "optional": true },
+    "cloudflare": { "optional": true },
+    "google-auth-library": { "optional": true }
   },
   "devDependencies": {
+    "@azure/identity": "4.13.1",
+    "@azure/identity-cache-persistence": "1.3.0",
+    "@infrasync/adapter-terraform-config-json": "workspace:*",
+    "@infrasync/adapter-terraform-show-json": "workspace:*",
+    "@infrasync/cloudflare": "workspace:*",
     "@infrasync/core": "workspace:*",
+    "@infrasync/core-ir": "workspace:*",
+    "@infrasync/github": "workspace:*",
+    "@infrasync/google-workspace": "workspace:*",
+    "@infrasync/microsoft-entra-id": "workspace:*",
+    "@infrasync/migration-planner": "workspace:*",
+    "@infrasync/namecheap": "workspace:*",
+    "@infrasync/namecom": "workspace:*",
+    "@infrasync/tailscale": "workspace:*",
+    "@infrasync/vercel": "workspace:*",
+    "@microsoft/microsoft-graph-client": "3.0.7",
+    "@microsoft/microsoft-graph-types": "2.43.1",
+    "@vercel/sdk": "1.21.5",
+    "cloudflare": "5.2.0",
+    "google-auth-library": "10.6.2",
     "tsdown": "0.21.7",
     "tsx": "4.21.0",
-    "typescript": "6.0.3",
-    "zod": "4.3.6"
+    "typescript": "6.0.3"
   }
 }

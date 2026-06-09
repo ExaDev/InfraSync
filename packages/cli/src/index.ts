@@ -678,8 +678,10 @@ async function loadConfigAdapters(
   const config = await loadConfig(resolved);
   const adapters = new Map(builtinAdapters);
   if (config.adapters !== undefined) {
-    for (const [name, adapter] of Object.entries(config.adapters)) {
-      adapters.set(name, adapter);
+    // Key by the adapter's own name — that's what provider instances in the
+    // IR reference — not by the arbitrary export identifier in the config.
+    for (const adapter of Object.values(config.adapters)) {
+      adapters.set(adapter.adapterName, adapter);
     }
   }
   // Auto-register discovered plugins
@@ -837,8 +839,10 @@ async function run(command: RuntimeCommand, configPath: string): Promise<void> {
   // Merge built-in adapters with any custom adapters from the config
   const adapters = new Map(builtinAdapters);
   if (config.adapters !== undefined) {
-    for (const [name, adapter] of Object.entries(config.adapters)) {
-      adapters.set(name, adapter);
+    // Key by the adapter's own name — that's what provider instances in the
+    // IR reference — not by the arbitrary export identifier in the config.
+    for (const adapter of Object.values(config.adapters)) {
+      adapters.set(adapter.adapterName, adapter);
     }
   }
   // Auto-register discovered plugins

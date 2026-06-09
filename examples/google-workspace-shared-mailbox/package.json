@@ -12,11 +12,10 @@
     "_lint": "eslint . --cache"
   },
   "dependencies": {
-    "@infrasync/core": "workspace:*",
-    "@infrasync/google-workspace": "workspace:*"
+    "google-auth-library": "10.6.2",
+    "infrasync": "workspace:*"
   },
   "devDependencies": {
-    "@infrasync/cli": "workspace:*",
     "typescript": "6.0.3"
   }
 }

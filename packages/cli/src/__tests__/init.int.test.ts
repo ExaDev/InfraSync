@@ -48,11 +48,8 @@ describe("infrasync init", () => {
     assert.equal(rawPackageJson.type, "module");
     const deps = rawPackageJson.dependencies;
     assert.ok(isRecord(deps));
-    assert.ok(
-      "@infrasync/cloudflare" in deps,
-      "must include cloudflare provider",
-    );
-    assert.ok("@infrasync/core" in deps, "must include core");
+    assert.ok("infrasync" in deps, "must include the infrasync umbrella");
+    assert.ok("cloudflare" in deps, "must include the provider's peer SDK");
     const scripts = rawPackageJson.scripts;
     assert.ok(isRecord(scripts));
     assert.ok("plan" in scripts, "must have plan script");
@@ -90,7 +87,7 @@ describe("infrasync init", () => {
 
     const config = await readFile(join(tempDir, "infra.config.ts"), "utf-8");
     assert.ok(config.includes("defineInfra"));
-    assert.ok(config.includes("@infrasync/cloudflare"));
+    assert.ok(config.includes("infrasync/cloudflare"));
     assert.ok(config.includes("DnsRecord"));
     assert.ok(config.includes("CF_API_TOKEN"));
   });

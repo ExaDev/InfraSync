@@ -22,7 +22,10 @@ import { stdin as input, stdout as output } from "node:process";
 // ─── Provider registry ──────────────────────────────────────────────────────
 
 interface ProviderTemplate {
-  readonly packageName: string;
+  /** The provider's peer SDK package the scaffolded project must install. */
+  readonly sdkPackage: string;
+  readonly sdkVersion: string;
+  /** The `infrasync/<provider>` subpath the config imports the adapter from. */
   readonly importPath: string;
   readonly configFields: string;
   readonly exampleResource: string;
@@ -30,8 +33,9 @@ interface ProviderTemplate {
 
 const PROVIDERS: Readonly<Record<string, ProviderTemplate>> = {
   cloudflare: {
-    packageName: "@infrasync/cloudflare",
-    importPath: "@infrasync/cloudflare",
+    sdkPackage: "cloudflare",
+    sdkVersion: "^5.2.0",
+    importPath: "infrasync/cloudflare",
     configFields: `{
       apiToken: { $secret: { env: "CF_API_TOKEN" } },
       accountId: { $secret: { env: "CF_ACCOUNT_ID" } },
@@ -66,8 +70,8 @@ function generatePackageJson(
           drift: "infrasync drift --config infra.config.ts",
         },
         dependencies: {
-          "@infrasync/core": "workspace:*",
-          [provider.packageName]: "workspace:*",
+          infrasync: "latest",
+          [provider.sdkPackage]: provider.sdkVersion,
         },
       },
       null,
@@ -102,14 +106,14 @@ function generateConfig(
   providerKey: string,
   template: ProviderTemplate,
 ): string {
-  return `import { defineInfra } from "@infrasync/core/compiler";
+  return `import { defineInfra } from "infrasync";
 import { ${providerKey} } from "${template.importPath}";
 
 // Register adapters so the CLI can connect to providers.
 export const adapters = { ${providerKey} };
 
 // Uncomment to add custom resource plugins:
-// import { customResource } from "@infrasync/core/plugin";
+// import { customResource } from "infrasync";
 // export const plugins = [
 //   customResource({ ... }),
 // ];

@@ -1,10 +1,6 @@
 #!/usr/bin/env node
-// The CLI always runs from source via jiti — it's not part of the library bundle.
-// The library bundle (dist/) is for programmatic SDK usage only.
-import { createJiti } from "jiti";
-
-const jiti = createJiti(import.meta.url, {
-  interopDefault: true,
-});
-
-jiti.import("../src/index.js");
+// The CLI runs from the bundled dist, which inlines the @infrasync/* internals
+// so the published package is self-contained. jiti is still used at runtime
+// (inside the bundle, via loader.ts) to load the user's TypeScript
+// infra.config.ts.
+import "../dist/index.mjs";
