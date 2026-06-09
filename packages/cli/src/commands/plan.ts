@@ -1,8 +1,8 @@
 import { readFileSync, writeFileSync } from "node:fs";
-import type { InfraIR } from "@infrasync-org/core/types";
-import type { ActionDag } from "@infrasync-org/core/action-dag";
+import type { InfraIR } from "@infrasync/core/types";
+import type { ActionDag } from "@infrasync/core/action-dag";
 import type { AdapterRegistry } from "../registry.js";
-import { SyncEngine } from "@infrasync-org/core/sync";
+import { SyncEngine } from "@infrasync/core/sync";
 import {
   renderPlanText,
   renderPlanDot,

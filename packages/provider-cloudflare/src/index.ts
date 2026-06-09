@@ -5,11 +5,11 @@ import type {
   ProviderAdapter,
   ResolvedScopes,
   ResourceRegistry,
-} from "@infrasync-org/core/provider";
+} from "@infrasync/core/provider";
 import {
   defineProvider,
   ResourceRegistry as Registry,
-} from "@infrasync-org/core/provider";
+} from "@infrasync/core/provider";
 import * as z from "zod";
 import { DnsRecordResource } from "./dns-record.js";
 import { AccessApplicationResource } from "./access-app.js";

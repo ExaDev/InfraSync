@@ -10,7 +10,7 @@ import {
   mergeInventoryConfig,
   inventorySchema,
 } from "../inventory.js";
-import type { InfraIR } from "@infrasync-org/core/types";
+import type { InfraIR } from "@infrasync/core/types";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 

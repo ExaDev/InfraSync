@@ -16,7 +16,7 @@
 export type SemVer = "major" | "minor" | "patch";
 
 export interface WorkspacePackage {
-  /** Package name (e.g. @infrasync-org/core) */
+  /** Package name (e.g. @infrasync/core) */
   readonly name: string;
   /** Absolute path to package.json */
   readonly path: string;

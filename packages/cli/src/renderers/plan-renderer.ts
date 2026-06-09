@@ -6,8 +6,8 @@
  * - DOT: Graphviz-compatible directed graph for visualisation.
  * - JSON: serialised ActionDag for --save-plan / --from-plan.
  */
-import type { ActionDag, ActionNode } from "@infrasync-org/core/action-dag";
-import { actionDagSchema } from "@infrasync-org/core/action-dag";
+import type { ActionDag, ActionNode } from "@infrasync/core/action-dag";
+import { actionDagSchema } from "@infrasync/core/action-dag";
 
 // ─── Action icons ────────────────────────────────────────────────────────────
 

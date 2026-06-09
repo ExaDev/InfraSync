@@ -5,11 +5,11 @@ import type {
   ResolvedScopes,
   ResourcePort,
   ResourceRegistry,
-} from "@infrasync-org/core/provider";
+} from "@infrasync/core/provider";
 import {
   defineProvider,
   ResourceRegistry as Registry,
-} from "@infrasync-org/core/provider";
+} from "@infrasync/core/provider";
 import {
   buildCredential,
   buildGraphClient,
@@ -28,7 +28,7 @@ import { UserSoftwareOathMethodResource } from "./user-software-oath-method.js";
  * The Microsoft Entra ID adapter descriptor. Pass this to `infra.provider()`:
  *
  * ```typescript
- * import { microsoftEntraId } from "@infrasync-org/microsoft-entra-id";
+ * import { microsoftEntraId } from "@infrasync/microsoft-entra-id";
  *
  * const entra = infra.provider("entra", microsoftEntraId, {
  *   kind: "client-credentials",

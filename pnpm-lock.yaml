@@ -83,14 +83,14 @@ importers:
 
   examples/google-workspace-shared-mailbox:
     dependencies:
-      '@infrasync-org/core':
+      '@infrasync/core':
         specifier: workspace:*
         version: link:../../packages/core
-      '@infrasync-org/google-workspace':
+      '@infrasync/google-workspace':
         specifier: workspace:*
         version: link:../../packages/provider-google-workspace
     devDependencies:
-      '@infrasync-org/cli':
+      '@infrasync/cli':
         specifier: workspace:*
         version: link:../../packages/cli
       typescript:
@@ -99,17 +99,17 @@ importers:
 
   packages/adapter-terraform-config-json:
     dependencies:
-      '@infrasync-org/core-fidelity':
+      '@infrasync/core-fidelity':
         specifier: workspace:*
         version: link:../core-fidelity
-      '@infrasync-org/core-ir':
+      '@infrasync/core-ir':
         specifier: workspace:*
         version: link:../core-ir
       zod:
         specifier: 4.3.6
         version: 4.3.6
     devDependencies:
-      '@infrasync-org/core':
+      '@infrasync/core':
         specifier: workspace:*
         version: link:../core
       tsdown:
@@ -124,13 +124,13 @@ importers:
 
   packages/adapter-terraform-show-json:
     dependencies:
-      '@infrasync-org/core':
+      '@infrasync/core':
         specifier: workspace:*
         version: link:../core
-      '@infrasync-org/core-fidelity':
+      '@infrasync/core-fidelity':
         specifier: workspace:*
         version: link:../core-fidelity
-      '@infrasync-org/core-ir':
+      '@infrasync/core-ir':
         specifier: workspace:*
         version: link:../core-ir
       zod:
@@ -149,16 +149,16 @@ importers:
 
   packages/cli:
     dependencies:
-      '@infrasync-org/adapter-terraform-config-json':
+      '@infrasync/adapter-terraform-config-json':
         specifier: workspace:*
         version: link:../adapter-terraform-config-json
-      '@infrasync-org/adapter-terraform-show-json':
+      '@infrasync/adapter-terraform-show-json':
         specifier: workspace:*
         version: link:../adapter-terraform-show-json
-      '@infrasync-org/core-ir':
+      '@infrasync/core-ir':
         specifier: workspace:*
         version: link:../core-ir
-      '@infrasync-org/migration-planner':
+      '@infrasync/migration-planner':
         specifier: workspace:*
         version: link:../migration-planner
       jiti:
@@ -168,7 +168,7 @@ importers:
         specifier: 2.9.0
         version: 2.9.0
     devDependencies:
-      '@infrasync-org/core':
+      '@infrasync/core':
         specifier: workspace:*
         version: link:../core
       tsdown:
@@ -234,16 +234,16 @@ importers:
 
   packages/migration-planner:
     dependencies:
-      '@infrasync-org/adapter-terraform-config-json':
+      '@infrasync/adapter-terraform-config-json':
         specifier: workspace:*
         version: link:../adapter-terraform-config-json
-      '@infrasync-org/core':
+      '@infrasync/core':
         specifier: workspace:*
         version: link:../core
-      '@infrasync-org/core-fidelity':
+      '@infrasync/core-fidelity':
         specifier: workspace:*
         version: link:../core-fidelity
-      '@infrasync-org/core-ir':
+      '@infrasync/core-ir':
         specifier: workspace:*
         version: link:../core-ir
       zod:
@@ -269,7 +269,7 @@ importers:
         specifier: 4.3.6
         version: 4.3.6
     devDependencies:
-      '@infrasync-org/core':
+      '@infrasync/core':
         specifier: workspace:*
         version: link:../core
       tsdown:
@@ -288,7 +288,7 @@ importers:
         specifier: 4.3.6
         version: 4.3.6
     devDependencies:
-      '@infrasync-org/core':
+      '@infrasync/core':
         specifier: workspace:*
         version: link:../core
       tsdown:
@@ -310,7 +310,7 @@ importers:
         specifier: 4.3.6
         version: 4.3.6
     devDependencies:
-      '@infrasync-org/core':
+      '@infrasync/core':
         specifier: workspace:*
         version: link:../core
       gaxios:
@@ -344,7 +344,7 @@ importers:
         specifier: 4.3.6
         version: 4.3.6
     devDependencies:
-      '@infrasync-org/core':
+      '@infrasync/core':
         specifier: workspace:*
         version: link:../core
       tsdown:
@@ -363,7 +363,7 @@ importers:
         specifier: 4.3.6
         version: 4.3.6
     devDependencies:
-      '@infrasync-org/core':
+      '@infrasync/core':
         specifier: workspace:*
         version: link:../core
       tsdown:
@@ -382,7 +382,7 @@ importers:
         specifier: 4.3.6
         version: 4.3.6
     devDependencies:
-      '@infrasync-org/core':
+      '@infrasync/core':
         specifier: workspace:*
         version: link:../core
       tsdown:
@@ -401,7 +401,7 @@ importers:
         specifier: 4.3.6
         version: 4.3.6
     devDependencies:
-      '@infrasync-org/core':
+      '@infrasync/core':
         specifier: workspace:*
         version: link:../core
       tsdown:
@@ -423,7 +423,7 @@ importers:
         specifier: 4.3.6
         version: 4.3.6
     devDependencies:
-      '@infrasync-org/core':
+      '@infrasync/core':
         specifier: workspace:*
         version: link:../core
       tsdown:

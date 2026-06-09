@@ -3,12 +3,12 @@ import type {
   ResourceScopes,
   ResolvedScopes,
   ResourceCodec,
-} from "@infrasync-org/core/provider";
-import { RefToken } from "@infrasync-org/core/refs";
-import type { RefBuilder } from "@infrasync-org/core/handles";
+} from "@infrasync/core/provider";
+import { RefToken } from "@infrasync/core/refs";
+import type { RefBuilder } from "@infrasync/core/handles";
 import { TailscaleClient, requireClient } from "./client.js";
 import * as z from "zod";
-import { ProviderApiError } from "@infrasync-org/core/errors";
+import { ProviderApiError } from "@infrasync/core/errors";
 
 // ─── Ref type ────────────────────────────────────────────────────────────────
 

@@ -1,7 +1,7 @@
-import type { InfraIR } from "@infrasync-org/core/types";
-import type { OrphanedResource } from "@infrasync-org/core/provider";
+import type { InfraIR } from "@infrasync/core/types";
+import type { OrphanedResource } from "@infrasync/core/provider";
 import type { AdapterRegistry } from "../registry.js";
-import { SyncEngine } from "@infrasync-org/core/sync";
+import { SyncEngine } from "@infrasync/core/sync";
 
 // ─── Options ─────────────────────────────────────────────────────────────────
 

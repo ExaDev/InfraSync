@@ -1,5 +1,5 @@
 /**
- * @infrasync-org/migration-planner — public API.
+ * @infrasync/migration-planner — public API.
  */
 export { compare, type PlannerOptions } from "./planner.js";
 export {

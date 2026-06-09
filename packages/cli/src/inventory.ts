@@ -13,7 +13,7 @@ import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import * as z from "zod";
 import { parse as parseYaml } from "yaml";
-import type { InfraIR, ProviderInstanceIR } from "@infrasync-org/core/types";
+import type { InfraIR, ProviderInstanceIR } from "@infrasync/core/types";
 
 // ─── Schema ──────────────────────────────────────────────────────────────────
 

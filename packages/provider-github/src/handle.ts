@@ -2,8 +2,8 @@ import type {
   ResourceHandle,
   ResourceOptions,
   RefBuilder,
-} from "@infrasync-org/core/handles";
-import { createResourceHandle } from "@infrasync-org/core/handles";
+} from "@infrasync/core/handles";
+import { createResourceHandle } from "@infrasync/core/handles";
 import type { RepositoryRefs } from "./repository.js";
 import { buildRepositoryRefs } from "./repository.js";
 import type { BranchProtectionRefs } from "./branch-protection.js";

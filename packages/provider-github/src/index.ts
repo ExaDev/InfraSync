@@ -4,11 +4,11 @@ import type {
   ResourcePort,
   ResolvedScopes,
   ResourceRegistry,
-} from "@infrasync-org/core/provider";
+} from "@infrasync/core/provider";
 import {
   defineProvider,
   ResourceRegistry as Registry,
-} from "@infrasync-org/core/provider";
+} from "@infrasync/core/provider";
 import { GitHubClient } from "./client.js";
 import { githubConfigSchema } from "./config.js";
 import { RepositoryResource } from "./repository.js";
@@ -22,7 +22,7 @@ import { ActionsSecretResource } from "./actions-secret.js";
  * The GitHub adapter descriptor. Pass this to `infra.provider()`:
  *
  * ```typescript
- * import { github } from "@infrasync-org/github";
+ * import { github } from "@infrasync/github";
  *
  * const gh = infra.provider("gh", github, {
  *   token: infra.secret.env("GITHUB_TOKEN"),

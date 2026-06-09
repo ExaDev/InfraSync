@@ -7,8 +7,8 @@
 import type {
   TerraformIR,
   TerraformResourceIR,
-} from "@infrasync-org/core-ir/schemas";
-import type { ResourceIR } from "@infrasync-org/core/types";
+} from "@infrasync/core-ir/schemas";
+import type { ResourceIR } from "@infrasync/core/types";
 import type { PluginRegistry } from "./plugin-registry.js";
 import type { ResourceKey } from "./schemas.js";
 

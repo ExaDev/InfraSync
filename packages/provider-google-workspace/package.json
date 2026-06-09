@@ -1,5 +1,5 @@
 {
-  "name": "@infrasync-org/google-workspace",
+  "name": "@infrasync/google-workspace",
   "version": "0.1.0",
   "type": "module",
   "exports": {
@@ -26,10 +26,10 @@
     "zod": "4.3.6"
   },
   "peerDependencies": {
-    "@infrasync-org/core": "workspace:*"
+    "@infrasync/core": "workspace:*"
   },
   "devDependencies": {
-    "@infrasync-org/core": "workspace:*",
+    "@infrasync/core": "workspace:*",
     "gaxios": "7.1.4",
     "tsdown": "0.21.7",
     "tsx": "4.21.0",

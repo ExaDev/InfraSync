@@ -1,4 +1,4 @@
-import type { ProviderAdapter } from "@infrasync-org/core/provider";
+import type { ProviderAdapter } from "@infrasync/core/provider";
 
 /**
  * Registry of available provider adapters, keyed by adapter name.

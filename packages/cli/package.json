@@ -1,5 +1,5 @@
 {
-  "name": "@infrasync-org/cli",
+  "name": "@infrasync/cli",
   "version": "0.1.0",
   "type": "module",
   "bin": {
@@ -22,18 +22,18 @@
     "_test": "node --import tsx --test 'src/__tests__/*.int.test.ts' 'src/__tests__/*.unit.test.ts'"
   },
   "dependencies": {
-    "@infrasync-org/adapter-terraform-config-json": "workspace:*",
-    "@infrasync-org/adapter-terraform-show-json": "workspace:*",
-    "@infrasync-org/core-ir": "workspace:*",
-    "@infrasync-org/migration-planner": "workspace:*",
+    "@infrasync/adapter-terraform-config-json": "workspace:*",
+    "@infrasync/adapter-terraform-show-json": "workspace:*",
+    "@infrasync/core-ir": "workspace:*",
+    "@infrasync/migration-planner": "workspace:*",
     "jiti": "2.6.1",
     "yaml": "2.9.0"
   },
   "peerDependencies": {
-    "@infrasync-org/core": "workspace:*"
+    "@infrasync/core": "workspace:*"
   },
   "devDependencies": {
-    "@infrasync-org/core": "workspace:*",
+    "@infrasync/core": "workspace:*",
     "tsdown": "0.21.7",
     "tsx": "4.21.0",
     "typescript": "6.0.3",

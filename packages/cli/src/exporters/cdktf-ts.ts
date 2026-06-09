@@ -4,7 +4,7 @@ import type {
   RefTokenIR,
   ResourceIR,
   SecretSourceIR,
-} from "@infrasync-org/core/types";
+} from "@infrasync/core/types";
 import type {
   ExportResult,
   ExportWarning,

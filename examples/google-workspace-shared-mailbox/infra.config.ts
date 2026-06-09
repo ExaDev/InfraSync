@@ -21,11 +21,11 @@
  *   GOOGLE_OAUTH_CLIENT_ID, GOOGLE_OAUTH_CLIENT_SECRET, GOOGLE_OAUTH_REFRESH_TOKEN
  */
 
-import { defineInfra } from "@infrasync-org/core/compiler";
+import { defineInfra } from "@infrasync/core/compiler";
 import {
   googleWorkspace,
   createGoogleWorkspaceHandle,
-} from "@infrasync-org/google-workspace";
+} from "@infrasync/google-workspace";
 
 export const adapters = { googleWorkspace };
 
