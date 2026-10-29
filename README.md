@@ -1,5 +1,7 @@
 # InfraSync
 
+[![GitHub](https://img.shields.io/badge/GitHub-181717?logo=github&logoColor=white)](https://github.com/ExaDev/InfraSync) [![CI](https://img.shields.io/github/actions/workflow/status/ExaDev/InfraSync/ci.yml?branch=main)](https://github.com/ExaDev/InfraSync/actions)
+
 Stateless, typesafe, serialisable, declarative, deterministic, idempotent infrastructure management — powered by a DAG and written in TypeScript.
 
 InfraSync is a TypeScript package and CLI for managing cloud infrastructure without a state file. Infrastructure can be authored with nested `Infra` scopes, declarative fragments, or any mixture of the two. Both forms compile to a serialisable `InfraIR`. The engine then executes a three-phase pipeline — read current state from providers, plan an action DAG, execute the DAG — applying only the changes needed. No stored state to corrupt, no lock files to stale, no remote backend to configure.
